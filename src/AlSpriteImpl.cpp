@@ -39,16 +39,14 @@ ALSpriteImpl* ALSpriteImpl::FlipHorizontal() {
     ALSpriteImpl* copy = new ALSpriteImpl(*this);
     sf::Vector2f curScale = copy->sprite.getScale();
     copy->sprite.setScale(-curScale.x, curScale.y);
-    if (copy->sprite.getScale().x < 0.f) {
-        copy->sprite.setOrigin((float)texture->getSize().x, 0.f);
-    } else {
-        copy->sprite.setOrigin(0.f, 0.f);
-    }
     return copy;
 }
 
 FRSize ALSpriteImpl::GetSizeWH() {
     auto [x, y] = texture->getSize();
     sf::Vector2f scale = sprite.getScale();
-    return { static_cast<int>(std::round(x * std::abs(scale.x))), static_cast<int>(std::round(y * std::abs(scale.y))) };
+    return {
+        static_cast<int>(std::round(x * std::abs(scale.x))),
+        static_cast<int>(std::round(y * std::abs(scale.y)))
+    };
 }
