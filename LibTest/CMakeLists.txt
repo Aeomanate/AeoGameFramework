@@ -1,48 +1,63 @@
-cmake_minimum_required(VERSION 3.13)
-project(LibTest)
+# This directory is added by the framework's root CMakeLists.txt.
+foreach(variant IN ITEMS Shared Static)
+    set(test_target LibTest_${variant})
 
-set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} \
-        -std=gnu++2a \
-        -pedantic \
-        -Wall \
-        -Wextra\
-         \
-        -Wconversion \
-        -Wenum-compare \
-        -Wfloat-equal \
-        -Woverloaded-virtual \
-        \
-        \
-    "
+    add_executable(${test_target} main.cpp)
+
+    target_link_libraries(${test_target} PRIVATE
+            Aeo::GameFramework::${variant}
     )
 
-set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
+    # Embed MinGW runtimes in the fully static test executable.
+    if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+            AND variant STREQUAL "Static")
+        target_link_options(${test_target} PRIVATE -static)
+    endif()
 
-set(BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Build)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
+    if(WIN32 AND variant STREQUAL "Shared")
+        # Allow launching the shared test from the build directory.
+        add_custom_command(TARGET ${test_target} POST_BUILD
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                $<TARGET_RUNTIME_DLLS:${test_target}>
+                "$<TARGET_FILE_DIR:${test_target}>"
+                COMMAND_EXPAND_LISTS
+                VERBATIM
+        )
+    endif()
+endforeach()
 
-set(AEOLIB_ROOT "D:/Programms/ProgrammingEnvironment/Librares/AeoGameLib")
-set(AEO_DLL ${AEOLIB_ROOT}/bin/libAeoGameFramework.dll)
-include_directories(${AEOLIB_ROOT}/include)
+if(WIN32)
+    # Scan both the executable and framework DLL for compiler/runtime DLLs.
+    get_filename_component(compiler_runtime_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
 
-add_executable(${PROJECT_NAME}
-    main.cpp
-
+    install(TARGETS LibTest_Shared AeoGameFramework_shared
+            RUNTIME_DEPENDENCIES
+            DIRECTORIES "${compiler_runtime_dir}"
+            PRE_EXCLUDE_REGEXES
+            "^[Aa][Pp][Ii]-[Mm][Ss]-.*"
+            "^[Ee][Xx][Tt]-[Mm][Ss]-.*"
+            POST_EXCLUDE_REGEXES
+            ".*[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\].*"
+            RUNTIME DESTINATION bin
     )
 
-target_link_libraries(${PROJECT_NAME} ${AEO_DLL})
+    install(TARGETS LibTest_Static
+            RUNTIME DESTINATION bin
+    )
+else()
+    # Keep the shared test runnable from the installed layout on Unix.
+    if(APPLE)
+        set_target_properties(LibTest_Shared PROPERTIES
+                INSTALL_RPATH "@loader_path/../lib"
+        )
+    elseif(UNIX)
+        set_target_properties(LibTest_Shared PROPERTIES
+                INSTALL_RPATH "$ORIGIN/../lib"
+        )
+    endif()
 
-install(FILES ${AEO_DLL} DESTINATION ${BUILD_DIR})
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${BUILD_DIR})
-
-
-
-
-
-
-
-
-
-
-
+    install(TARGETS LibTest_Shared LibTest_Static AeoGameFramework_shared
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+    )
+endif()

@@ -8,7 +8,9 @@
 #include <chrono>
 #include <memory>
 
-#if defined(FRAMEWORK_PROJECT)
+#if defined(AEO_STATIC) || !defined(_WIN32)
+    #define API
+#elif defined(FRAMEWORK_PROJECT)
     #define API __declspec(dllexport)
 #else
     #define API __declspec(dllimport)

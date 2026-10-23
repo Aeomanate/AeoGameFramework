@@ -1,63 +1,84 @@
-cmake_minimum_required(VERSION 3.20)
-project(AeoGameFramework)
+cmake_minimum_required(VERSION 3.25)
+project(AeoGameFramework VERSION 1.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-        -std=gnu++2a \
-        -pedantic \
-        -Wall \
-        -Wextra\
-         \
-        -Wconversion \
-        -Wenum-compare \
-        -Wfloat-equal \
-        -Woverloaded-virtual \
-        \
-    "
+# Standalone installation packages only LibTest and its runtime dependencies.
+if(PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/LibTest/installed"
+            CACHE PATH "Installation directory for LibTest" FORCE
     )
-
-
-if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
-set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc")
 
-add_definitions(-DFRAMEWORK_PROJECT)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Dependencies
+include(FetchContent)
 
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(SFML_BUILD_AUDIO OFF CACHE BOOL "Build SFML audio")
+set(SFML_BUILD_NETWORK OFF CACHE BOOL "Build SFML network")
+
+FetchContent_Declare(SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 2.6.2
+        SYSTEM
+)
+FetchContent_MakeAvailable(SFML)
+
+# Keep SFML's SDK out of the test installation. Linked targets still build.
+set_property(DIRECTORY "${sfml_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Library targets
 set(SRC_FRAMEWORK
-    AeoGameFramework.cpp
-    AeoGameFramework.hpp
-    Timer.cpp
-    Sprite.cpp
-    AlSpriteImpl.cpp
-    AlSpriteImpl.hpp
-    Internal.cpp
-    Internal.hpp
+        src/AeoGameFramework.cpp
+        src/Timer.cpp
+        src/Sprite.cpp
+        src/AlSpriteImpl.cpp
+        src/AlSpriteImpl.hpp
+        src/Internal.cpp
+        src/Internal.hpp
+)
 
+add_library(AeoGameFramework_shared SHARED ${SRC_FRAMEWORK})
+add_library(AeoGameFramework_static STATIC ${SRC_FRAMEWORK})
+
+add_library(Aeo::GameFramework::Shared ALIAS AeoGameFramework_shared)
+add_library(Aeo::GameFramework::Static ALIAS AeoGameFramework_static)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# The public header uses this definition to disable DLL import/export.
+target_compile_definitions(AeoGameFramework_static PUBLIC AEO_STATIC)
+
+foreach(target IN ITEMS AeoGameFramework_shared AeoGameFramework_static)
+    set_target_properties(${target} PROPERTIES VERSION "${PROJECT_VERSION}")
+
+    if(NOT PROJECT_IS_TOP_LEVEL)
+        set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    endif()
+
+    target_compile_features(${target} PUBLIC cxx_std_20)
+
+    target_include_directories(${target} PUBLIC
+            "${CMAKE_CURRENT_SOURCE_DIR}/include"
     )
 
-set(LIB_HEADER AeoGameFramework.hpp)
+    target_compile_definitions(${target} PRIVATE FRAMEWORK_PROJECT)
 
-add_library(${PROJECT_NAME} SHARED ${SRC_FRAMEWORK})
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 1.0)
+    target_link_libraries(${target} PRIVATE
+            sfml-graphics sfml-window sfml-system
+    )
 
-set(LIBS_ROOT "D:/Programms/ProgrammingEnvironment/Librares")
-set(SFML_ROOT "${LIBS_ROOT}/SFML-2.5.1")
-set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML")
-set(SFML_STATIC_LIBRARIES TRUE)
-find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
-target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-window sfml-system)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${target} PRIVATE
+                -pedantic -Wall -Wextra
+                -Wconversion -Wenum-compare -Wfloat-equal
+                -Woverloaded-virtual
+        )
+    endif()
+endforeach()
 
-set(AEOLIB_DEST "${LIBS_ROOT}/AeoGameLib")
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${AEOLIB_DEST}/bin
-        LIBRARY DESTINATION ${AEOLIB_DEST}/lib
-        ARCHIVE DESTINATION ${AEOLIB_DEST}/lib)
-install(FILES ${LIB_HEADER} DESTINATION ${AEOLIB_DEST}/include)
-
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/LibTest)
-
-
-
-
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Tests are built and installed only when opening this project directly.
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(LibTest)
+endif()
