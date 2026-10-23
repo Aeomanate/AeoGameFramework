@@ -153,11 +153,13 @@ int run(AeoGameFramework* user_framework) {
     while(is_work) {
         while(timer.IfExpiredThenStart());
         is_work = handleUserInput(user_framework);
-        user_framework->Tick();
+        if(!is_work) break;
+        if(!user_framework->Tick()) break;
         framework_data->render_texture.display();
         framework_data->window.draw(framework_data->window_sprite);
         framework_data->window.display();
     }
     framework_data->window.close();
+    user_framework->Close();
     return 0;
 }

@@ -37,6 +37,10 @@ void FRSprite::Draw(int x, int y) {
     sprite_impl->Draw(x, y);
 }
 
+void FRSprite::SetSize(int width, int height) {
+    sprite_impl->SetSize(width, height);
+}
+
 FRSprite FRSprite::FlipHorizontal() {
     return FRSprite(sprite_impl->FlipHorizontal());
 }

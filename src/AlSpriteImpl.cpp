@@ -6,6 +6,7 @@
 
 #include "AlSpriteImpl.hpp"
 #include "Internal.hpp"
+#include <cmath>
 
 ALSpriteImpl::ALSpriteImpl(char const* path) {
     texture = std::make_shared<sf::Texture>();
@@ -22,14 +23,32 @@ void ALSpriteImpl::Draw(int x, int y) {
     framework_data->render_texture.draw(sprite, sf::Transform().translate((float)x, (float)y));
 }
 
+void ALSpriteImpl::SetSize(int width, int height) {
+    auto [x, y] = texture->getSize();
+    if (x == 0 || y == 0) return;
+    float sx = (float)width / (float)x;
+    float sy = (float)height / (float)y;
+    if (sprite.getScale().x < 0.f) {
+        sprite.setScale(-sx, sy);
+    } else {
+        sprite.setScale(sx, sy);
+    }
+}
+
 ALSpriteImpl* ALSpriteImpl::FlipHorizontal() {
     ALSpriteImpl* copy = new ALSpriteImpl(*this);
-    copy->sprite.setScale(-1, 1);
-    copy->sprite.setOrigin((float)copy->GetSizeWH().w, 0);
+    sf::Vector2f curScale = copy->sprite.getScale();
+    copy->sprite.setScale(-curScale.x, curScale.y);
+    if (copy->sprite.getScale().x < 0.f) {
+        copy->sprite.setOrigin((float)texture->getSize().x, 0.f);
+    } else {
+        copy->sprite.setOrigin(0.f, 0.f);
+    }
     return copy;
 }
 
 FRSize ALSpriteImpl::GetSizeWH() {
     auto [x, y] = texture->getSize();
-    return { (int)x, (int)y };
+    sf::Vector2f scale = sprite.getScale();
+    return { static_cast<int>(std::round(x * std::abs(scale.x))), static_cast<int>(std::round(y * std::abs(scale.y))) };
 }

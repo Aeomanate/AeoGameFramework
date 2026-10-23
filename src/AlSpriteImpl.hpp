@@ -16,7 +16,7 @@ class ALSpriteImpl {
     explicit ALSpriteImpl(sf::Texture const& in_texture);
     
     void Draw(int x, int y);
-    
+    void SetSize(int width, int height);
     ALSpriteImpl* FlipHorizontal();
     
     FRSize GetSizeWH();

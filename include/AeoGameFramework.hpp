@@ -32,6 +32,7 @@ class API FRSprite {
     void Load(const char* path);
     
     void Draw(int x, int y);
+    void SetSize(int width, int height);
     FRSprite FlipHorizontal();
     FRSize GetSizeWH();
   
