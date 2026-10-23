@@ -9,7 +9,7 @@
 std::unique_ptr<FrameworkData> framework_data;
 
 FrameworkData::FrameworkData(
-    ALSize scene_size,
+    FRSize scene_size,
     sf::VideoMode window_size,
     char const* window_name,
     bool is_fullscreen

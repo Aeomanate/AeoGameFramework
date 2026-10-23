@@ -19,7 +19,7 @@ class ALSpriteImpl {
     
     ALSpriteImpl* FlipHorizontal();
     
-    ALSize GetSizeWH();
+    FRSize GetSizeWH();
   
   private:
     ALSpriteImpl(ALSpriteImpl const& other) = default;

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(AeoGameFramework VERSION 1.1 LANGUAGES CXX)
 
+if(POLICY CMP0207)
+    cmake_policy(SET CMP0207 NEW)
+endif()
+
 # Standalone installation packages only LibTest and its runtime dependencies.
 if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/LibTest/installed"

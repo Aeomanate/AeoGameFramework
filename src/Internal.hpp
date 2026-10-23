@@ -10,7 +10,7 @@
 
 struct FrameworkData {
     FrameworkData(
-        ALSize scene_size,
+        FRSize scene_size,
         sf::VideoMode window_size,
         const char* window_name,
         bool is_fullscreen

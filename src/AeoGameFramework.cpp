@@ -13,8 +13,8 @@
 #include "Internal.hpp"
 
 AeoGameFramework::AeoGameFramework(
-    ALSize scene_size,
-    ALSize screen_size,
+    FRSize scene_size,
+    FRSize screen_size,
     const char* title,
     bool is_fullscreen
 ) {
@@ -54,7 +54,7 @@ void drawTestBackground() {
     background.Draw(0, 0);
 }
 
-ALSize getSceneSize() {
+FRSize getSceneSize() {
     auto [x, y] = framework_data->render_texture.getSize();
     return {(int)x, (int)y};
 }
@@ -62,13 +62,21 @@ ALSize getSceneSize() {
 void handleMoving(
     AeoGameFramework* user_framework,
     sf::Event::KeyEvent key,
-    void (AeoGameFramework::*event)(ALKey)
+    void (AeoGameFramework::*event)(FRKey)
 ) {
     switch(key.code) {
-        case sf::Keyboard::Key::W: (user_framework->*event)(ALKey::UP);    break;
-        case sf::Keyboard::Key::S: (user_framework->*event)(ALKey::DOWN);  break;
-        case sf::Keyboard::Key::A: (user_framework->*event)(ALKey::LEFT);  break;
-        case sf::Keyboard::Key::D: (user_framework->*event)(ALKey::RIGHT); break;
+        case sf::Keyboard::Key::Up:
+        case sf::Keyboard::Key::W: (user_framework->*event)(FRKey::UP);    break;
+
+        case sf::Keyboard::Key::Down:
+        case sf::Keyboard::Key::S: (user_framework->*event)(FRKey::DOWN);  break;
+
+        case sf::Keyboard::Key::Left:
+        case sf::Keyboard::Key::A: (user_framework->*event)(FRKey::LEFT);  break;
+
+        case sf::Keyboard::Key::Right:
+        case sf::Keyboard::Key::D: (user_framework->*event)(FRKey::RIGHT); break;
+
         default: break;
     }
 }
@@ -76,17 +84,17 @@ void handleMoving(
 void handleMousePress(
     AeoGameFramework* user_framework,
     sf::Event::MouseButtonEvent mouse,
-    void (AeoGameFramework::*event)(ALMouseButton)
+    void (AeoGameFramework::*event)(FRMouseButton)
 ) {
     switch(mouse.button) {
         case sf::Mouse::Button::Left:
-            (user_framework->*event)(ALMouseButton::LEFT);
+            (user_framework->*event)(FRMouseButton::LEFT);
             break;
         case sf::Mouse::Button::Right:
-            (user_framework->*event)(ALMouseButton::RIGHT);
+            (user_framework->*event)(FRMouseButton::RIGHT);
             break;
         case sf::Mouse::Button::Middle:
-            (user_framework->*event)(ALMouseButton::MIDDLE);
+            (user_framework->*event)(FRMouseButton::MIDDLE);
             break;
         default:
             break;

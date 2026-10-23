@@ -17,26 +17,26 @@
 #endif
 
 
-struct ALSize {
+struct FRSize {
     int w, h;
 };
 
 class ALSpriteImpl;
-class API ALSprite {
+class API FRSprite {
   public:
-    explicit ALSprite(const char* path = nullptr);
-    ALSprite(ALSprite&& other) noexcept;
-    ALSprite(ALSprite const&) = delete;
+    explicit FRSprite(const char* path = nullptr);
+    FRSprite(FRSprite&& other) noexcept;
+    FRSprite(FRSprite const&) = delete;
     
-    ~ALSprite();
+    ~FRSprite();
     void Load(const char* path);
     
     void Draw(int x, int y);
-    ALSprite FlipHorizontal();
-    ALSize GetSizeWH();
+    FRSprite FlipHorizontal();
+    FRSize GetSizeWH();
   
   private:
-    explicit ALSprite(ALSpriteImpl*);
+    explicit FRSprite(ALSpriteImpl*);
     ALSpriteImpl* sprite_impl = nullptr;
 };
 
@@ -67,7 +67,7 @@ class API Timer {
     TimeMs interval;
 };
 
-enum class ALKey {
+enum class FRKey {
     RIGHT,
     LEFT,
     DOWN,
@@ -75,7 +75,7 @@ enum class ALKey {
     NONE
 };
 
-enum class ALMouseButton {
+enum class FRMouseButton {
     LEFT,
     MIDDLE,
     RIGHT,
@@ -85,8 +85,8 @@ enum class ALMouseButton {
 class API AeoGameFramework {
   public:
     AeoGameFramework(
-        ALSize scene_size,
-        ALSize screen_size,
+        FRSize scene_size,
+        FRSize screen_size,
         const char* title,
         bool is_fullscreen
     );
@@ -103,20 +103,20 @@ class API AeoGameFramework {
     // param: x, y : coordinate, relative to window
     virtual void OnMouseMove(int x, int y, int xrelative, int yrelative) = 0;
     
-    virtual void OnMouseButtonPressed(ALMouseButton button) = 0;
+    virtual void OnMouseButtonPressed(FRMouseButton button) = 0;
     
-    virtual void OnMouseButtonReleased(ALMouseButton button) = 0;
+    virtual void OnMouseButtonReleased(FRMouseButton button) = 0;
     
-    virtual void OnKeyPressed(ALKey k) = 0;
+    virtual void OnKeyPressed(FRKey k) = 0;
     
-    virtual void OnKeyReleased(ALKey k) = 0;
+    virtual void OnKeyReleased(FRKey k) = 0;
     
     virtual ~AeoGameFramework() = default;
 };
 
 API void drawTestBackground();
 
-API ALSize getSceneSize();
+API FRSize getSceneSize();
 
 API int run(AeoGameFramework*);
 

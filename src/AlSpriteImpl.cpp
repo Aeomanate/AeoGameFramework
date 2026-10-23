@@ -29,7 +29,7 @@ ALSpriteImpl* ALSpriteImpl::FlipHorizontal() {
     return copy;
 }
 
-ALSize ALSpriteImpl::GetSizeWH() {
+FRSize ALSpriteImpl::GetSizeWH() {
     auto [x, y] = texture->getSize();
     return { (int)x, (int)y };
 }

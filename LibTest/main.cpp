@@ -5,8 +5,8 @@
 class MyGame: public AeoGameFramework {
   public:
     MyGame(
-        ALSize scene_size,
-        ALSize screen_size,
+        FRSize scene_size,
+        FRSize screen_size,
         char const* title,
         bool fullscreen
     )
@@ -36,19 +36,19 @@ class MyGame: public AeoGameFramework {
         std::cout << "V(" << xrelative << ", " << yrelative << ")\n";
     }
     
-    void OnMouseButtonPressed(ALMouseButton button) override {
+    void OnMouseButtonPressed(FRMouseButton button) override {
         std::cout << "Button pressed: " << (int)button << "\n";
     }
     
-    void OnMouseButtonReleased(ALMouseButton button) override {
+    void OnMouseButtonReleased(FRMouseButton button) override {
         std::cout << "Button released: " << (int)button << "\n";
     }
     
-    void OnKeyPressed(ALKey k) override {
+    void OnKeyPressed(FRKey k) override {
         std::cout << "Key pressed: " << (int)k << "\n";
     }
     
-    void OnKeyReleased(ALKey k) override {
+    void OnKeyReleased(FRKey k) override {
         std::cout << "Key released: " << (int)k << "\n";
     }
 };
